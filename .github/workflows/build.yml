@@ -10,29 +10,29 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
-
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.7'
-
       - name: Build debug APK
         run: |
           F=$(find . -name settings.gradle.kts -not -path './.git/*' | head -n 1)
           if [ -z "$F" ]; then
-            echo "settings.gradle.kts TIDAK ADA di repo. Isi repo:"
+            echo "Cari file zip di repo..."
+            mkdir -p _src
+            find . -maxdepth 2 -name '*.zip' -not -path './.git/*' -not -path './_src/*' | while read -r z; do unzip -o -q "$z" -d _src; done
+            F=$(find _src -name settings.gradle.kts | head -n 1)
+          fi
+          if [ -z "$F" ]; then
+            echo "settings.gradle.kts tidak ketemu. Isi repo:"
             find . -not -path './.git/*' -maxdepth 3 | head -50
             exit 1
           fi
-          DIR=$(dirname "$F")
-          echo "Folder project: $DIR"
-          cd "$DIR"
+          cd "$(dirname "$F")"
           gradle assembleDebug --no-daemon
-
       - uses: actions/upload-artifact@v4
         with:
           name: DailyCheckQQ-apk

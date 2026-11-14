@@ -21,9 +21,19 @@ jobs:
           gradle-version: '8.7'
 
       - name: Build debug APK
-        run: gradle assembleDebug --no-daemon
+        run: |
+          F=$(find . -name settings.gradle.kts -not -path './.git/*' | head -n 1)
+          if [ -z "$F" ]; then
+            echo "settings.gradle.kts TIDAK ADA di repo. Isi repo:"
+            find . -not -path './.git/*' -maxdepth 3 | head -50
+            exit 1
+          fi
+          DIR=$(dirname "$F")
+          echo "Folder project: $DIR"
+          cd "$DIR"
+          gradle assembleDebug --no-daemon
 
       - uses: actions/upload-artifact@v4
         with:
           name: DailyCheckQQ-apk
-          path: app/build/outputs/apk/debug/*.apk
+          path: '**/build/outputs/apk/debug/*.apk'

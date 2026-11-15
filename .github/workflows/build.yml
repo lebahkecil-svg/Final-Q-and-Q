@@ -21,14 +21,18 @@ jobs:
         run: |
           F=$(find . -name settings.gradle.kts -not -path './.git/*' | head -n 1)
           if [ -z "$F" ]; then
-            echo "Cari file zip di repo..."
+            echo "Membuka zip di repo..."
             mkdir -p _src
-            find . -maxdepth 2 -name '*.zip' -not -path './.git/*' -not -path './_src/*' | while read -r z; do unzip -o -q "$z" -d _src; done
+            for i in 1 2 3; do
+              find . -name '*.zip' -not -path './.git/*' -print0 | while IFS= read -r -d '' z; do
+                unzip -o -q "$z" -d _src
+              done
+            done
             F=$(find _src -name settings.gradle.kts | head -n 1)
           fi
           if [ -z "$F" ]; then
             echo "settings.gradle.kts tidak ketemu. Isi repo:"
-            find . -not -path './.git/*' -maxdepth 3 | head -50
+            find . -not -path './.git/*' -maxdepth 4 | head -60
             exit 1
           fi
           cd "$(dirname "$F")"
